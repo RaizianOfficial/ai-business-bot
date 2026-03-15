@@ -31,13 +31,15 @@ export async function POST(req: NextRequest) {
         else if (text.includes("product code") || text.includes("hamper code")) lastAsk = "product_code";
         else if (text.includes("phone") || text.includes("number")) lastAsk = "phone";
         else if (text.includes("city")) lastAsk = "city";
-        else if (text.includes("address") || text.includes("delivery address")) lastAsk = "address";
         else if (text.includes("email")) lastAsk = "email";
+        else if (text.includes("address") || text.includes("delivery address")) lastAsk = "address";
         else if (text.includes("message") || text.includes("card")) lastAsk = "custom_message";
       } else if (m.role === "user") {
         if (lastAsk) orderData[lastAsk] = m.content;
       }
     }
+
+    const userMessages = messages.filter((m: any) => m.role === "user");
 
     let nextStep = "";
     if (!orderData.name) nextStep = "ASK_NAME";
@@ -53,7 +55,7 @@ export async function POST(req: NextRequest) {
       try {
         const protocol = req.headers.get("x-forwarded-proto") || "http";
         const host = req.headers.get("host");
-        
+
         await fetch(`${protocol}://${host}/api/save-order`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -63,8 +65,8 @@ export async function POST(req: NextRequest) {
         console.error("Failed to parse/save order:", e);
       }
 
-      return NextResponse.json({ 
-        text: "🎉 Thank you for your order!\n\nOur team will contact you soon to confirm your hamper." 
+      return NextResponse.json({
+        text: "🎉 Thank you for your order!\n\nOur team will contact you soon to confirm your hamper."
       });
     }
 
