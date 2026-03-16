@@ -9,10 +9,64 @@ export async function POST(req: NextRequest) {
 
     if (!messages || messages.length === 0) {
       return NextResponse.json({
-        text: "✨ Welcome to the online shop of Velourah!\nMay I know your name first? 😊"
+        text: "Welcome to Velourah 🎁\n\nI can help you:\n\n1️⃣ Place a new hamper order\n2️⃣ Track an existing order\n\nType:\n**Order** to place a new order\nor\n**Track #OrderID** to check your order status",
+        quickButtons: ["Place Order", "Track Order"]
       });
     }
 
+    // Get the latest user message
+    const latestUserMessage = [...messages].reverse().find((m: any) => m.role === "user");
+    const userText = latestUserMessage?.content?.trim() || "";
+
+    // --- ORDER TRACKING DETECTION ---
+    const orderMatch = userText.match(/#VL\d+/i);
+    if (orderMatch) {
+      const orderId = orderMatch[0].toUpperCase();
+      try {
+        const protocol = req.headers.get("x-forwarded-proto") || "http";
+        const host = req.headers.get("host");
+        const res = await fetch(`${protocol}://${host}/api/track-order?orderId=${encodeURIComponent(orderId)}`);
+        const data = await res.json();
+
+        if (!data.found) {
+          return NextResponse.json({
+            text: `❌ Order not found.\n\nNo order exists with ID **${orderId}**.\n\nPlease check the Order ID and try again.\nExample: Track #VL1023`
+          });
+        }
+
+        const order = data.order;
+        const statusEmoji: Record<string, string> = {
+          "Pending": "⏳",
+          "Confirmed": "✅",
+          "Packed": "📦",
+          "Shipped": "🚚",
+          "Delivered": "🎉",
+          "Cancelled": "❌"
+        };
+
+        const emoji = statusEmoji[order.status] || "📋";
+
+        return NextResponse.json({
+          text: `📦 **Order Details**\n\n**Order ID:** ${order.order_id}\n**Product:** ${order.product_code}\n**Customer:** ${order.customer_name}\n**City:** ${order.city}\n\n**Status:** ${order.status} ${emoji}\n\nNeed anything else? Type **Order** to place a new order.`,
+          quickButtons: ["Place Order", "Track Order"]
+        });
+      } catch (e) {
+        console.error("Order tracking error:", e);
+        return NextResponse.json({
+          text: "Sorry, I couldn't look up that order right now. Please try again later."
+        });
+      }
+    }
+
+    // --- TRACK ORDER REQUEST (without ID) ---
+    if (userText.toLowerCase() === "track order" || userText.toLowerCase() === "track") {
+      return NextResponse.json({
+        text: "Please enter your Order ID 🔍\n\nExample: **#VL1023**",
+        awaitingOrderId: true
+      });
+    }
+
+    // --- PLACE ORDER FLOW ---
     let orderData: any = {
       name: "",
       product_code: "",
@@ -39,8 +93,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const userMessages = messages.filter((m: any) => m.role === "user");
-
     let nextStep = "";
     if (!orderData.name) nextStep = "ASK_NAME";
     else if (!orderData.product_code) nextStep = "ASK_PRODUCT_CODE";
@@ -56,18 +108,25 @@ export async function POST(req: NextRequest) {
         const protocol = req.headers.get("x-forwarded-proto") || "http";
         const host = req.headers.get("host");
 
-        await fetch(`${protocol}://${host}/api/save-order`, {
+        const saveRes = await fetch(`${protocol}://${host}/api/save-order`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(orderData)
         });
-      } catch (e) {
-        console.error("Failed to parse/save order:", e);
-      }
 
-      return NextResponse.json({
-        text: "🎉 Thank you for your order!\n\nOur team will contact you soon to confirm your hamper."
-      });
+        const saveData = await saveRes.json();
+        const orderId = saveData.order_id || "#VL0000";
+
+        return NextResponse.json({
+          text: `🎉 **Your order has been placed successfully!**\n\n**Order ID:** ${orderId}\n\nYou can use this Order ID anytime to check your order status.\n\nExample: **Track ${orderId}**\n\nThank you for choosing Velourah! 💜`,
+          quickButtons: ["Place Order", "Track Order"]
+        });
+      } catch (e) {
+        console.error("Failed to save order:", e);
+        return NextResponse.json({
+          text: "Sorry, there was an error placing your order. Please try again."
+        });
+      }
     }
 
     const stepContexts: any = {
@@ -80,7 +139,7 @@ export async function POST(req: NextRequest) {
       ASK_MESSAGE: "Ask the customer if they want to add a custom message for the gift card (optional). If they say no, accept it."
     };
 
-    const prompt = `You are a helpful gift hamper assistant. 
+    const prompt = `You are a helpful gift hamper assistant for Velourah. 
 ${stepContexts[nextStep]} 
 Keep the question short, natural, and friendly. Do not include any extra conversation.`;
 

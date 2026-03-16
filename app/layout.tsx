@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const outfit = Outfit({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800", "900"] });
 
 export const metadata: Metadata = {
-  title: "AI Gift Hamper Order Assistant",
-  description: "Order your favorite gift hampers with the help of AI",
+  title: "Velourah - Premium Gift Hampers",
+  description: "Order premium curated gift hampers for every occasion. AI-powered ordering, fast delivery across India.",
 };
 
 export default function RootLayout({
@@ -16,9 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-[#020617] text-white min-h-screen selection:bg-primary/30`}>
+      <body className={`${outfit.className} bg-[#020617] text-white min-h-screen selection:bg-primary/30`}>
         {children}
       </body>
     </html>
   );
 }
+

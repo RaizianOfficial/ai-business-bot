@@ -12,11 +12,12 @@ const transporter = nodemailer.createTransport({
 
 export const sendOrderNotification = async (order: any) => {
   const mailOptions = {
-    from: '"Hamper Store" <' + process.env.SMTP_USER + ">",
+    from: '"Velourah Hampers" <' + process.env.SMTP_USER + ">",
     to: process.env.ADMIN_EMAIL,
-    subject: "New Gift Hamper Order",
-    text: `New order received
+    subject: `New Order ${order.order_id || ""} - Gift Hamper`,
+    text: `🎁 New order received!
 
+Order ID: ${order.order_id || "N/A"}
 Name: ${order.name}
 Product Code: ${order.product_code}
 Phone: ${order.phone}
@@ -24,6 +25,7 @@ City: ${order.city}
 Address: ${order.address}
 Email: ${order.email || "Not provided"}
 Message: ${order.custom_message || "None"}
+Status: ${order.status || "Pending"}
 `,
   };
 

@@ -1,8 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Trash2, CheckCircle, Package, LogOut, Loader2 } from "lucide-react";
+import { Lock, Trash2, CheckCircle, Package, LogOut, Loader2, ChevronDown, Clock, Truck, Gift, XCircle, BoxIcon } from "lucide-react";
+
+const STATUS_OPTIONS = [
+  { value: "Pending", label: "Pending", emoji: "⏳", color: "amber" },
+  { value: "Confirmed", label: "Confirmed", emoji: "✅", color: "green" },
+  { value: "Packed", label: "Packed", emoji: "📦", color: "blue" },
+  { value: "Shipped", label: "Shipped", emoji: "🚚", color: "purple" },
+  { value: "Delivered", label: "Delivered", emoji: "🎉", color: "emerald" },
+  { value: "Cancelled", label: "Cancelled", emoji: "❌", color: "red" },
+];
+
+function getStatusStyle(status: string) {
+  const s = status?.toLowerCase() || "pending";
+  switch (s) {
+    case "pending": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    case "confirmed": return "bg-green-500/10 text-green-400 border-green-500/20";
+    case "packed": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+    case "shipped": return "bg-purple-500/10 text-purple-400 border-purple-500/20";
+    case "delivered": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+    case "cancelled": return "bg-red-500/10 text-red-400 border-red-500/20";
+    default: return "bg-white/10 text-white/60 border-white/20";
+  }
+}
 
 export default function AdminDashboard() {
   const [passkey, setPasskey] = useState("");
@@ -10,12 +32,14 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
       const res = await fetch(`/api/orders?passkey=${passkey}`);
       if (res.ok) {
@@ -39,6 +63,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ id, status, passkey }),
       });
       setOrders(orders.map(o => o.id === id ? { ...o, status } : o));
+      setOpenDropdown(null);
     } catch (err) {
       console.error(err);
     }
@@ -57,6 +82,10 @@ export default function AdminDashboard() {
     }
   };
 
+  const filteredOrders = statusFilter === "all" 
+    ? orders 
+    : orders.filter(o => o.status?.toLowerCase() === statusFilter.toLowerCase());
+
   if (!isAuthorized) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-[#020617]">
@@ -70,7 +99,7 @@ export default function AdminDashboard() {
           </div>
           <h1 className="text-2xl font-bold text-center mb-2">Admin Access</h1>
           <p className="text-center text-white/40 mb-8 font-light">Please enter your security passkey</p>
-          
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <input
@@ -96,116 +125,155 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] p-6">
+    <div className="min-h-screen bg-[#020617] p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-1 italic">Order Dashboard</h1>
-            <p className="text-white/40 text-sm">Managing ${orders.length} active orders</p>
+            <h1 className="text-2xl md:text-3xl font-bold mb-1">Order Dashboard</h1>
+            <p className="text-white/40 text-sm">Managing {orders.length} orders</p>
           </div>
-          <button 
-            onClick={() => setIsAuthorized(false)} 
+          <button
+            onClick={() => setIsAuthorized(false)}
             className="flex items-center gap-2 text-white/40 hover:text-white transition-colors"
           >
             <LogOut size={18} />
-            <span className="text-sm font-medium">Logout</span>
+            <span className="text-sm font-medium hidden sm:inline">Logout</span>
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {[
-            { label: "Total Orders", value: orders.length, icon: <Package className="text-primary" /> },
-            { label: "Pending", value: orders.filter(o => o.status === "pending").length, icon: <Loader2 className="text-secondary" /> },
-            { label: "Completed", value: orders.filter(o => o.status === "confirmed").length, icon: <CheckCircle className="text-green-400" /> },
-          ].map((s, i) => (
-            <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-white/40 mb-1">{s.label}</p>
-                <p className="text-2xl font-bold">{s.value}</p>
-              </div>
-              <div className="p-3 bg-white/5 rounded-xl">{s.icon}</div>
-            </div>
-          ))}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-8">
+          {STATUS_OPTIONS.map((s) => {
+            const count = orders.filter(o => o.status === s.value).length;
+            return (
+              <button
+                key={s.value}
+                onClick={() => setStatusFilter(statusFilter === s.value.toLowerCase() ? "all" : s.value.toLowerCase())}
+                className={`p-4 rounded-2xl border transition-all duration-200 text-left ${
+                  statusFilter === s.value.toLowerCase()
+                    ? `${getStatusStyle(s.value)} border-2`
+                    : "bg-white/5 border-white/10 hover:bg-white/[0.08]"
+                }`}
+              >
+                <p className="text-lg mb-1">{s.emoji}</p>
+                <p className="text-xs text-white/40 mb-0.5">{s.label}</p>
+                <p className="text-xl font-bold">{count}</p>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Table */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-md">
-          <div className="overflow-x-auto">
+        {/* Filter indicator */}
+        {statusFilter !== "all" && (
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-sm text-white/40">Filtered by:</span>
+            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusStyle(statusFilter)}`}>
+              {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+            </span>
+            <button onClick={() => setStatusFilter("all")} className="text-xs text-white/40 hover:text-white underline ml-2">
+              Clear
+            </button>
+          </div>
+        )}
+
+        {/* Orders Table */}
+        <div className="bg-white/5 border border-white/10 rounded-3xl shadow-2xl backdrop-blur-md">
+          <div className="w-full overflow-visible">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/5 bg-white/5">
-                  <th className="px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest">Product</th>
-                  <th className="px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest">Delivery</th>
-                  <th className="px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest">Customer Info</th>
-                  <th className="px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest">Status</th>
-                  <th className="px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest">Actions</th>
+                  <th className="px-4 md:px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest">Order ID</th>
+                  <th className="px-4 md:px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest">Product</th>
+                  <th className="px-4 md:px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest hidden md:table-cell">Customer</th>
+                  <th className="px-4 md:px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest hidden lg:table-cell">Delivery</th>
+                  <th className="px-4 md:px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest">Status</th>
+                  <th className="px-4 md:px-6 py-4 text-xs font-bold text-white/40 uppercase tracking-widest">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 <AnimatePresence>
-                  {orders.map((o) => (
+                  {filteredOrders.map((o) => (
                     <motion.tr
                       key={o.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="hover:bg-white/[0.02] transition-colors"
+                      className={`hover:bg-white/[0.02] transition-colors relative ${openDropdown === o.id ? "z-50" : "z-0"}`}
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-4 md:px-6 py-4">
+                        <span className="font-mono font-bold text-primary text-sm">
+                          {o.order_id || "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 md:px-6 py-4">
                         <div className="bg-primary/20 text-primary text-xs font-black w-10 h-10 rounded-lg flex items-center justify-center">
                           {o.product_code}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <p className="font-medium text-sm">{o.delivery_date}</p>
-                        <p className="text-xs text-white/40">{o.city}</p>
-                      </td>
-                      <td className="px-6 py-4 max-w-xs">
-                        <p className="text-sm truncate">{o.address}</p>
+                      <td className="px-4 md:px-6 py-4 hidden md:table-cell">
+                        <p className="font-medium text-sm">{o.name || o.customer_name || "—"}</p>
                         <p className="text-xs text-secondary font-medium">{o.phone}</p>
+                        <p className="text-xs text-white/30">{o.email}</p>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          o.status === "pending" ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
-                          o.status === "confirmed" ? "bg-green-500/10 text-green-500 border border-green-500/20" :
-                          "bg-blue-500/10 text-blue-500 border border-blue-500/20"
-                        }`}>
-                          {o.status}
-                        </span>
+                      <td className="px-4 md:px-6 py-4 max-w-xs hidden lg:table-cell">
+                        <p className="text-sm truncate">{o.city}</p>
+                        <p className="text-xs text-white/40 truncate">{o.address}</p>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <button 
-                            onClick={() => updateStatus(o.id, "confirmed")}
-                            className="p-2 bg-green-500/10 text-green-500 rounded-lg hover:bg-green-500 hover:text-white transition-all"
-                            title="Confirm Order"
+                      <td className="px-4 md:px-6 py-4 relative">
+                        <div className="relative">
+                          <button
+                            onClick={() => setOpenDropdown(openDropdown === o.id ? null : o.id)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border transition-all ${getStatusStyle(o.status)}`}
                           >
-                            <CheckCircle size={16} />
+                            {o.status || "Pending"}
+                            <ChevronDown size={12} className={`transition-transform ${openDropdown === o.id ? "rotate-180" : ""}`} />
                           </button>
-                          <button 
-                            onClick={() => updateStatus(o.id, "shipped")}
-                            className="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-white transition-all"
-                            title="Mark Shipped"
-                          >
-                            <Package size={16} />
-                          </button>
-                          <button 
-                            onClick={() => deleteOrder(o.id)}
-                            className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"
-                            title="Delete"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+
+                          {/* Status Dropdown */}
+                          <AnimatePresence>
+                            {openDropdown === o.id && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                                className="absolute right-0 mt-2 w-48 rounded-xl bg-slate-800 border border-white/10 shadow-lg z-50 overflow-hidden"
+                              >
+                                {STATUS_OPTIONS.map((s) => (
+                                  <button
+                                    key={s.value}
+                                    onClick={() => updateStatus(o.id, s.value)}
+                                    className={`w-full px-4 py-2.5 text-left text-sm flex items-center gap-2 transition-colors hover:bg-white/10 ${
+                                      o.status === s.value ? "bg-white/5 font-bold" : ""
+                                    }`}
+                                  >
+                                    <span>{s.emoji}</span>
+                                    <span>{s.label}</span>
+                                    {o.status === s.value && <CheckCircle size={14} className="ml-auto text-green-400" />}
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
+                      </td>
+                      <td className="px-4 md:px-6 py-4">
+                        <button
+                          onClick={() => deleteOrder(o.id)}
+                          className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </td>
                     </motion.tr>
                   ))}
                 </AnimatePresence>
-                {orders.length === 0 && (
+                {filteredOrders.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-white/20 italic">No orders found</td>
+                    <td colSpan={6} className="px-6 py-12 text-center text-white/20 italic">
+                      {statusFilter !== "all" ? `No ${statusFilter} orders found` : "No orders found"}
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -213,6 +281,11 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Click outside to close dropdown */}
+      {openDropdown && (
+        <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(null)} />
+      )}
     </div>
   );
 }

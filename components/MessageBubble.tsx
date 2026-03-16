@@ -8,6 +8,23 @@ interface Message {
   content: string;
 }
 
+function renderContent(text: string) {
+  // Split by **bold** markers and render accordingly
+  const parts = text.split(/\*\*(.*?)\*\*/g);
+  return parts.map((part, i) => {
+    if (i % 2 === 1) {
+      return <strong key={i} className="font-bold">{part}</strong>;
+    }
+    // Handle newlines
+    return part.split("\n").map((line, j, arr) => (
+      <span key={`${i}-${j}`}>
+        {line}
+        {j < arr.length - 1 && <br />}
+      </span>
+    ));
+  });
+}
+
 export default function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
 
@@ -28,7 +45,9 @@ export default function MessageBubble({ message }: { message: Message }) {
             : "bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-tl-none shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
         )}
       >
-        <p className="text-sm md:text-base leading-relaxed">{message.content}</p>
+        <div className="text-sm md:text-base leading-relaxed whitespace-pre-line">
+          {renderContent(message.content)}
+        </div>
       </div>
     </motion.div>
   );
