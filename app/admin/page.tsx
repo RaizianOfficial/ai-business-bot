@@ -60,6 +60,7 @@ export default function AdminDashboard() {
     try {
       await fetch("/api/update-order", {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status, passkey }),
       });
       setOrders(orders.map(o => o.id === id ? { ...o, status } : o));
@@ -74,6 +75,7 @@ export default function AdminDashboard() {
     try {
       await fetch("/api/update-order", {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, passkey, action: "delete" }),
       });
       setOrders(orders.filter(o => o.id !== id));
@@ -178,7 +180,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Orders Table */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl shadow-2xl backdrop-blur-md">
+        <div className={`bg-white/5 border border-white/10 rounded-3xl shadow-2xl backdrop-blur-md ${openDropdown ? "relative z-50" : ""}`}>
           <div className="w-full overflow-visible">
             <table className="w-full text-left">
               <thead>
@@ -223,8 +225,11 @@ export default function AdminDashboard() {
                       <td className="px-4 md:px-6 py-4 relative">
                         <div className="relative">
                           <button
-                            onClick={() => setOpenDropdown(openDropdown === o.id ? null : o.id)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border transition-all ${getStatusStyle(o.status)}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenDropdown(openDropdown === o.id ? null : o.id);
+                            }}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 w-[fit-content] rounded-full text-[11px] font-bold uppercase tracking-wider border transition-all pointer-events-auto cursor-pointer ${getStatusStyle(o.status)}`}
                           >
                             {o.status || "Pending"}
                             <ChevronDown size={12} className={`transition-transform ${openDropdown === o.id ? "rotate-180" : ""}`} />
@@ -237,13 +242,16 @@ export default function AdminDashboard() {
                                 initial={{ opacity: 0, y: -5, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: -5, scale: 0.95 }}
-                                className="absolute right-0 mt-2 w-48 rounded-xl bg-slate-800 border border-white/10 shadow-lg z-50 overflow-hidden"
+                                className="absolute left-0 mt-2 w-48 rounded-xl bg-slate-800 border border-white/10 shadow-2xl z-50 overflow-hidden pointer-events-auto"
                               >
                                 {STATUS_OPTIONS.map((s) => (
                                   <button
                                     key={s.value}
-                                    onClick={() => updateStatus(o.id, s.value)}
-                                    className={`w-full px-4 py-2.5 text-left text-sm flex items-center gap-2 transition-colors hover:bg-white/10 ${
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateStatus(o.id, s.value);
+                                    }}
+                                    className={`w-full px-4 py-2.5 text-left text-sm flex items-center gap-2 transition-colors hover:bg-white/10 cursor-pointer pointer-events-auto ${
                                       o.status === s.value ? "bg-white/5 font-bold" : ""
                                     }`}
                                   >
@@ -260,7 +268,7 @@ export default function AdminDashboard() {
                       <td className="px-4 md:px-6 py-4">
                         <button
                           onClick={() => deleteOrder(o.id)}
-                          className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                          className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all cursor-pointer pointer-events-auto"
                           title="Delete"
                         >
                           <Trash2 size={16} />
