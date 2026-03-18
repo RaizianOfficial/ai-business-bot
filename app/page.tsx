@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { Gift, Heart, Calendar, ArrowRight, MessageCircle } from "lucide-react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { Gift, Heart, Calendar, ArrowRight, MessageCircle, Menu, X } from "lucide-react";
 import ChatWindow from "@/components/ChatWindow";
 
 function Section({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
@@ -58,6 +58,8 @@ const features = [
 export default function Home() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -65,17 +67,30 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+    if (mobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mobileMenuOpen]);
+
   return (
     <main className="min-h-screen bg-background text-textDark font-sans relative">
       {/* Navbar Minimalist */}
       <motion.nav
+        ref={menuRef}
         initial={{ y: -80 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          scrolled ? "bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm" : "bg-transparent"
+          scrolled || mobileMenuOpen ? "bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm text-textDark" : "bg-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between relative z-50">
           <div className="font-heading text-xl font-bold tracking-widest uppercase">
             Velourah
           </div>
@@ -85,11 +100,39 @@ export default function Home() {
             <a href="#" className="hover:text-primary transition-colors">Our Story</a>
             <a href="#" className="hover:text-primary transition-colors">Corporate</a>
           </div>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
             <button className="hidden md:block hover:text-primary transition-colors">Search</button>
             <button className="hover:text-primary transition-colors">Bag</button>
+            <button 
+              className="md:hidden hover:text-primary transition-colors ml-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-xl overflow-hidden absolute top-full left-0 w-full"
+            >
+              <div className="flex flex-col items-center py-8 gap-6">
+                <a href="#" onClick={() => setMobileMenuOpen(false)} className="text-sm tracking-widest font-semibold text-gray-800 uppercase hover:text-primary transition-colors">Shop All</a>
+                <a href="#" onClick={() => setMobileMenuOpen(false)} className="text-sm tracking-widest font-semibold text-gray-800 uppercase hover:text-primary transition-colors">Occasions</a>
+                <a href="#" onClick={() => setMobileMenuOpen(false)} className="text-sm tracking-widest font-semibold text-gray-800 uppercase hover:text-primary transition-colors">Our Story</a>
+                <a href="#" onClick={() => setMobileMenuOpen(false)} className="text-sm tracking-widest font-semibold text-gray-800 uppercase hover:text-primary transition-colors">Corporate</a>
+                <button onClick={() => setMobileMenuOpen(false)} className="text-sm tracking-widest font-semibold text-gray-800 uppercase hover:text-primary transition-colors">Search</button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.nav>
 
       {/* Hero Header */}
