@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Gift, Star, Heart, Truck, ShieldCheck, Sparkles, ChevronRight, Package, MessageCircle, ArrowRight } from "lucide-react";
+import { Gift, Heart, Calendar, ArrowRight, MessageCircle } from "lucide-react";
 import ChatWindow from "@/components/ChatWindow";
-import { useRef } from "react";
 
 function Section({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef(null);
@@ -13,9 +12,9 @@ function Section({ children, className = "", delay = 0 }: { children: React.Reac
   return (
     <motion.section
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay, ease: "easeOut" }}
+      transition={{ duration: 0.8, delay, ease: "easeOut" }}
       className={className}
     >
       {children}
@@ -25,61 +24,35 @@ function Section({ children, className = "", delay = 0 }: { children: React.Reac
 
 const hampers = [
   {
-    code: "301",
-    name: "Mini Birthday Hamper",
-    price: "₹199",
-    tag: "Best Seller",
-    gradient: "from-amber-500/20 to-orange-500/20",
-    borderColor: "border-amber-500/20",
-    tagColor: "bg-amber-500/20 text-amber-400"
+    code: "VL001",
+    name: "Midnight Velvet",
+    price: "$185.00",
+    image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=800&auto=format&fit=crop"
   },
   {
-    code: "302",
-    name: "Classic Birthday Hamper",
-    price: "₹299",
-    tag: "Popular",
-    gradient: "from-violet-500/20 to-fuchsia-500/20",
-    borderColor: "border-violet-500/20",
-    tagColor: "bg-violet-500/20 text-violet-400"
+    code: "VL002",
+    name: "Artisan Dawn",
+    price: "$140.00",
+    image: "https://images.unsplash.com/photo-1513885535851-8b925b0cb01e?q=80&w=800&auto=format&fit=crop"
   },
   {
-    code: "303",
-    name: "Premium Birthday Hamper",
-    price: "₹499",
-    tag: "Premium",
-    gradient: "from-emerald-500/20 to-teal-500/20",
-    borderColor: "border-emerald-500/20",
-    tagColor: "bg-emerald-500/20 text-emerald-400"
+    code: "VL003",
+    name: "Golden Hour",
+    price: "$210.00",
+    image: "https://images.unsplash.com/photo-1511216113906-8f56bbce1667?q=80&w=800&auto=format&fit=crop"
+  },
+  {
+    code: "VL004",
+    name: "Rosewood Serenity",
+    price: "$195.00",
+    image: "https://images.unsplash.com/photo-1542452255146-2ae702cb2e1c?q=80&w=800&auto=format&fit=crop"
   },
 ];
 
 const features = [
-  {
-    icon: <Gift className="text-primary" size={28} />,
-    title: "Handcrafted Hampers",
-    desc: "Each hamper is carefully curated with premium items and wrapped with love."
-  },
-  {
-    icon: <Truck className="text-secondary" size={28} />,
-    title: "Fast Delivery",
-    desc: "Quick delivery across all major cities within 2-3 business days."
-  },
-  {
-    icon: <Heart className="text-pink-400" size={28} />,
-    title: "Personalized Touch",
-    desc: "Add custom messages and make your gift truly special and memorable."
-  },
-  {
-    icon: <ShieldCheck className="text-emerald-400" size={28} />,
-    title: "Quality Assured",
-    desc: "Only the finest products make it into our hampers. 100% satisfaction."
-  },
-];
-
-const steps = [
-  { step: "01", title: "Choose Hamper", desc: "Pick from our curated collection of premium hampers.", icon: <Package size={24} /> },
-  { step: "02", title: "Chat with AI", desc: "Our AI assistant guides you through the ordering process.", icon: <MessageCircle size={24} /> },
-  { step: "03", title: "We Deliver", desc: "Sit back and relax while we deliver happiness to your doorstep.", icon: <Truck size={24} /> },
+  { title: "Hand-Selected Excellence", desc: "Every element is sourced from premium artisans, ensuring unparalleled quality in every box.", icon: <Gift size={22} className="text-primary" /> },
+  { title: "Arriving Exactly When It Matters", desc: "Precision delivery schedules because timing is the most important part of the gesture.", icon: <Calendar size={22} className="text-primary" /> },
+  { title: "A Personal Touch", desc: "Hand-written notes and bespoke customization options to make your gift truly unique.", icon: <Heart size={22} className="text-primary" /> }
 ];
 
 export default function Home() {
@@ -93,309 +66,238 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#020617] text-white overflow-hidden">
-      {/* Navbar */}
+    <main className="min-h-screen bg-background text-textDark font-sans relative">
+      {/* Navbar Minimalist */}
       <motion.nav
         initial={{ y: -80 }}
         animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
-          scrolled ? "bg-[#020617]/90 backdrop-blur-xl border-b border-white/5 shadow-xl" : "bg-transparent"
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          scrolled ? "bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm" : "bg-transparent"
         }`}
       >
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <Sparkles size={16} className="text-white" />
-            </div>
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-              Velourah
-            </span>
+        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="font-heading text-xl font-bold tracking-widest uppercase">
+            Velourah
           </div>
-          <button
-            onClick={() => setIsChatOpen(true)}
-            className="px-5 py-2 bg-white/10 border border-white/10 rounded-full text-sm font-semibold hover:bg-primary hover:border-primary transition-all duration-300"
-          >
-            Order Now
-          </button>
+          <div className="hidden md:flex items-center gap-8 text-xs tracking-widest font-semibold text-gray-800 uppercase">
+            <a href="#" className="hover:text-primary transition-colors">Shop All</a>
+            <a href="#" className="hover:text-primary transition-colors">Occasions</a>
+            <a href="#" className="hover:text-primary transition-colors">Our Story</a>
+            <a href="#" className="hover:text-primary transition-colors">Corporate</a>
+          </div>
+          <div className="flex gap-4">
+            <button className="hidden md:block hover:text-primary transition-colors">Search</button>
+            <button className="hover:text-primary transition-colors">Bag</button>
+          </div>
         </div>
       </motion.nav>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[100vh] flex items-center justify-center px-6 pt-20">
-        {/* Animated Background Orbs */}
-        <div className="absolute top-[15%] left-[10%] w-[40%] h-[40%] bg-primary/15 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[15%] right-[10%] w-[35%] h-[35%] bg-secondary/15 rounded-full blur-[120px] animate-pulse [animation-delay:1s]" />
-        <div className="absolute top-[50%] left-[50%] w-[20%] h-[20%] bg-amber-500/10 rounded-full blur-[80px] animate-pulse [animation-delay:2s]" />
-
-        <div className="text-center z-10 max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+      {/* Hero Header */}
+      <section className="relative w-full h-[85vh] md:h-[95vh] flex items-center bg-gray-200">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=2000&auto=format&fit=crop')" }}
+        />
+        <div className="absolute inset-0 bg-black/20" /> {/* Subtle darkening */}
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 w-full mt-20">
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="bg-white/90 backdrop-blur-md p-10 md:p-16 max-w-xl shadow-2xl"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-xs font-semibold text-primary/80 mb-8">
-              <Sparkles size={12} />
-              Thoughtful Gifts for Every Occasion
-            </div>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]"
-          >
-            <span className="bg-gradient-to-r from-white via-white to-white/50 bg-clip-text text-transparent">
-              Thoughtful{" "}
-            </span>
-            <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
-              Gift Hampers
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-white via-white to-white/50 bg-clip-text text-transparent">
-              for Every Special{" "}
-            </span>
-            <span className="bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
-              Moment
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-lg md:text-xl text-white/50 mb-10 max-w-xl mx-auto leading-relaxed"
-          >
-            Premium curated hampers delivered with love. Order seamlessly through our AI-powered assistant.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <button
+            <h1 className="font-heading text-4xl md:text-6xl text-textDark leading-tight mb-4">
+              Celebrate Life's Most <br />
+              <span className="italic text-primary font-normal">Beautiful Moments</span>
+            </h1>
+            <p className="text-gray-600 mb-8 max-w-sm leading-relaxed">
+              Curated with intention and wrapped in elegance. Discover gift hampers that speak when words aren't enough.
+            </p>
+            <button 
               onClick={() => setIsChatOpen(true)}
-              className="group px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-bold text-lg rounded-2xl hover:shadow-[0_0_40px_rgba(139,92,246,0.4)] transition-all duration-500 transform hover:scale-105 flex items-center justify-center gap-2"
+              className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-xs font-bold tracking-widest uppercase transition-colors"
             >
-              Order Now
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              Order Your Hamper
             </button>
-            <a
-              href="#hampers"
-              className="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold text-lg rounded-2xl hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              View Hampers
-              <ChevronRight size={20} />
-            </a>
-          </motion.div>
-
-          {/* Stats Row */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
-            className="mt-16 flex items-center justify-center gap-8 md:gap-16 text-center"
-          >
-            {[
-              { value: "500+", label: "Hampers Delivered" },
-              { value: "4.9★", label: "Customer Rating" },
-              { value: "50+", label: "Cities Covered" },
-            ].map((stat, i) => (
-              <div key={i}>
-                <p className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{stat.value}</p>
-                <p className="text-xs text-white/30 mt-1">{stat.label}</p>
-              </div>
-            ))}
           </motion.div>
         </div>
       </section>
 
-      {/* Featured Luxury Hampers */}
-      <Section className="py-20 md:py-28 px-6" delay={0.1}>
-        <div className="max-w-6xl mx-auto" id="hampers">
-          <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-secondary/10 border border-secondary/20 rounded-full text-xs font-semibold text-secondary/80 mb-4">
-              <Star size={12} />
-              Our Collection
-            </span>
-            <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-              <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                Featured Luxury Hampers
-              </span>
-            </h2>
-            <p className="text-white/40 max-w-md mx-auto">
-              Carefully curated hampers that bring joy to every celebration
-            </p>
+      {/* Features Row */}
+      <div className="border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+          {features.map((f, i) => (
+            <Section key={i} delay={i * 0.1}>
+              <div className="flex justify-center mb-4">
+                <div className="w-12 h-12 rounded-full border border-primary/20 flex items-center justify-center text-primary/80">
+                  {f.icon}
+                </div>
+              </div>
+              <h3 className="font-heading text-xl mb-3">{f.title}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">{f.desc}</p>
+            </Section>
+          ))}
+        </div>
+      </div>
+
+      {/* Signature Curations */}
+      <Section className="py-24 bg-accent/40">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+            <div>
+              <span className="text-xs uppercase tracking-widest text-gray-500 font-semibold mb-2 block">The Collection</span>
+              <h2 className="font-heading text-4xl">Signature Curations</h2>
+            </div>
+            <a href="#" className="hidden md:inline-block text-sm font-semibold border-b border-textDark pb-1 mt-4 hover:text-primary hover:border-primary transition-colors">
+              View All Collections
+            </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {hampers.map((hamper, i) => (
               <motion.div
-                key={hamper.code}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-                className={`group relative bg-gradient-to-b ${hamper.gradient} rounded-3xl border ${hamper.borderColor} p-6 hover:scale-[1.02] transition-all duration-500 cursor-pointer overflow-hidden`}
-                onClick={() => setIsChatOpen(true)}
-              >
-                {/* Hamper card glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40 rounded-3xl" />
-
-                <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${hamper.tagColor}`}>
-                      {hamper.tag}
-                    </span>
-                    <span className="text-xs text-white/30 font-mono">#{hamper.code}</span>
-                  </div>
-
-                  {/* Visual Placeholder */}
-                  <div className="w-full h-48 rounded-2xl bg-white/5 border border-white/10 mb-6 flex items-center justify-center group-hover:border-white/20 transition-all">
-                    <Gift size={48} className="text-white/10 group-hover:text-white/20 transition-colors" />
-                  </div>
-
-                  <h3 className="text-lg font-bold mb-2">{hamper.name}</h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-extrabold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                      {hamper.price}
-                    </span>
-                    <button className="p-2 bg-white/10 rounded-xl hover:bg-primary transition-all duration-300 group-hover:bg-primary">
-                      <ArrowRight size={16} />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* Why Choose Velourah */}
-      <Section className="py-20 md:py-28 px-6" delay={0.1}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-semibold text-emerald-400 mb-4">
-              <Heart size={12} />
-              Why Us
-            </span>
-            <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-              <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                Why Choose Velourah?
-              </span>
-            </h2>
-            <p className="text-white/40 max-w-md mx-auto">
-              We are committed to making every gifting experience extraordinary
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, i) => (
-              <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10 transition-all duration-400 group"
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="bg-white p-4 shadow-sm hover:shadow-xl transition-shadow group flex flex-col"
               >
-                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
+                <div className="aspect-square bg-background mb-6 overflow-hidden relative">
+                  <img src={hamper.image} alt={hamper.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 </div>
-                <h3 className="font-bold mb-2 text-base">{feature.title}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{feature.desc}</p>
+                <h3 className="font-heading text-lg mb-1">{hamper.name}</h3>
+                <p className="text-gray-500 text-sm mb-6">{hamper.price}</p>
+                
+                <button 
+                  onClick={() => setIsChatOpen(true)}
+                  className="mt-auto w-full py-3 border border-gray-200 text-xs font-semibold tracking-widest text-gray-600 hover:bg-textDark hover:text-white transition-colors"
+                >
+                  ADD TO SELECTION
+                </button>
               </motion.div>
             ))}
           </div>
         </div>
       </Section>
 
-      {/* Gifting Made Simple */}
-      <Section className="py-20 md:py-28 px-6" delay={0.1}>
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs font-semibold text-amber-400 mb-4">
-              <Sparkles size={12} />
-              How It Works
-            </span>
-            <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-              <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                Gifting Made Simple
-              </span>
-            </h2>
-            <p className="text-white/40 max-w-md mx-auto">
-              Three easy steps to deliver happiness
-            </p>
+      {/* Gifting Made Simple Steps */}
+      <Section className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="font-heading text-3xl md:text-4xl mb-16">Gifting Made Simple</h2>
+          
+          <div className="flex justify-between items-start relative before:absolute before:top-6 before:left-[10%] before:right-[10%] before:-z-10 before:h-[1px] before:bg-gray-200 hidden md:flex">
+             {[
+               { id: "1", title: "Choose", desc: "Browse our curated collection of theme-based hampers." },
+               { id: "2", title: "Personalize", desc: "Add a handwritten note or specific artisanal additions." },
+               { id: "3", title: "Deliver", desc: "We ensure it arrives in pristine condition at their doorstep." },
+             ].map((step, i) => (
+               <div key={i} className="flex flex-col items-center max-w-xs px-4 bg-white">
+                 <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center font-heading text-lg text-textDark mb-6 border-4 border-white shadow-sm">
+                   {step.id}
+                 </div>
+                 <h3 className="font-heading text-lg mb-2">{step.title}</h3>
+                 <p className="text-sm text-gray-500">{step.desc}</p>
+               </div>
+             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {steps.map((step, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="relative text-center p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all duration-400"
-              >
-                <div className="text-5xl font-extrabold bg-gradient-to-b from-primary/30 to-transparent bg-clip-text text-transparent mb-4">
-                  {step.step}
-                </div>
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-white/10 flex items-center justify-center mx-auto mb-4 text-white/60">
-                  {step.icon}
-                </div>
-                <h3 className="font-bold text-lg mb-2">{step.title}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{step.desc}</p>
-              </motion.div>
-            ))}
+          <div className="md:hidden flex flex-col gap-10">
+            {[
+               { id: "1", title: "Choose", desc: "Browse our curated collection of theme-based hampers." },
+               { id: "2", title: "Personalize", desc: "Add a handwritten note or specific artisanal additions." },
+               { id: "3", title: "Deliver", desc: "We ensure it arrives in pristine condition at their doorstep." },
+             ].map((step, i) => (
+               <div key={i} className="flex flex-col items-center text-center">
+                 <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center font-heading text-lg text-textDark mb-4">
+                   {step.id}
+                 </div>
+                 <h3 className="font-heading text-lg mb-2">{step.title}</h3>
+                 <p className="text-sm text-gray-500">{step.desc}</p>
+               </div>
+             ))}
           </div>
         </div>
       </Section>
 
-      {/* CTA Section */}
-      <Section className="py-20 md:py-28 px-6" delay={0.1}>
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="relative p-12 md:p-16 rounded-[2rem] bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/10 border border-white/10 overflow-hidden">
-            <div className="absolute top-0 left-[20%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[80px]" />
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-4 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-                Ready to Send Happiness?
-              </h2>
-              <p className="text-white/40 mb-8 max-w-md mx-auto">
-                Order your perfect gift hamper today and make someone&apos;s day truly special.
-              </p>
-              <button
-                onClick={() => setIsChatOpen(true)}
-                className="group px-10 py-4 bg-gradient-to-r from-primary to-secondary text-white font-bold text-lg rounded-2xl hover:shadow-[0_0_50px_rgba(139,92,246,0.5)] transition-all duration-500 transform hover:scale-105 inline-flex items-center gap-2"
-              >
-                Start Ordering
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </button>
+      {/* Occasions Blocks */}
+      <Section className="py-4">
+        <div className="w-full flex flex-col md:flex-row h-auto md:h-[60vh]">
+          {[
+            { title: "Birthdays", image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=800&auto=format&fit=crop" },
+            { title: "Anniversaries", image: "https://images.unsplash.com/photo-1606214041725-aa80ab7e9081?q=80&w=800&auto=format&fit=crop" },
+            { title: "New Beginnings", image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=800&auto=format&fit=crop" },
+          ].map((item, i) => (
+            <div key={i} className="flex-1 relative group cursor-pointer overflow-hidden h-64 md:h-auto border-r border-white/10 last:border-0 border-y md:border-y-0">
+               <img src={item.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={item.title} />
+               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
+               <div className="absolute inset-x-0 bottom-0 p-8 flex flex-col items-start translate-y-4 group-hover:translate-y-0 transition-transform">
+                 <h3 className="font-heading text-2xl text-white mb-2">{item.title}</h3>
+                 <span className="text-white/80 text-xs font-semibold tracking-widest uppercase flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                   EXPLORE <ArrowRight size={14} />
+                 </span>
+               </div>
             </div>
-          </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Testimonial */}
+      <Section className="py-24 bg-accent/20">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <Heart size={24} className="mx-auto text-primary/40 mb-8" />
+          <p className="font-heading text-2xl md:text-3xl italic text-textDark leading-relaxed mb-8">
+            "Receiving a Velourah hamper was more than just a gift; it was a profound feeling of being seen and cherished. Every detail whispered thoughtfulness."
+          </p>
+          <p className="text-xs uppercase tracking-widest font-semibold text-gray-500">
+            — Elena V., Paris
+          </p>
         </div>
       </Section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                <Sparkles size={14} className="text-white" />
-              </div>
-              <span className="font-bold text-lg bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">Velourah</span>
-            </div>
-            <div className="flex items-center gap-8 text-sm text-white/30">
-              <a href="#hampers" className="hover:text-white transition-colors">Hampers</a>
-              <button onClick={() => setIsChatOpen(true)} className="hover:text-white transition-colors">Order</button>
-              <a href="#" className="hover:text-white transition-colors">Contact</a>
-            </div>
-            <p className="text-xs text-white/20">
-              © 2026 Velourah. Made with 💜
+      <footer className="bg-textDark text-white pt-20 pb-10 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+          <div className="md:col-span-1">
+            <h2 className="font-heading text-2xl font-bold tracking-widest uppercase mb-6">Velourah</h2>
+            <p className="text-white/50 text-sm leading-relaxed max-w-xs">
+              Crafting emotional connections through the art of luxury gifting. Based in London, delivering elegance worldwide.
             </p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm mb-6 uppercase tracking-wider">Shop</h3>
+            <div className="flex flex-col gap-3 text-white/50 text-sm">
+              <a href="#" className="hover:text-white transition-colors">Best Sellers</a>
+              <a href="#" className="hover:text-white transition-colors">Custom Hampers</a>
+              <a href="#" className="hover:text-white transition-colors">Corporate Gifting</a>
+              <a href="#" className="hover:text-white transition-colors">New Arrivals</a>
+            </div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm mb-6 uppercase tracking-wider">Support</h3>
+            <div className="flex flex-col gap-3 text-white/50 text-sm">
+              <span onClick={() => setIsChatOpen(true)} className="hover:text-white transition-colors cursor-pointer">Track Order</span>
+              <a href="#" className="hover:text-white transition-colors">Shipping Policy</a>
+              <a href="#" className="hover:text-white transition-colors">Return Policy</a>
+              <a href="#" className="hover:text-white transition-colors">Contact Us</a>
+            </div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm mb-6 uppercase tracking-wider">The Journal</h3>
+            <p className="text-white/50 text-sm mb-4">Join our inner circle for gifting inspiration and exclusive previews.</p>
+            <div className="flex border-b border-white/20 pb-2">
+              <input type="email" placeholder="Your Email" className="bg-transparent border-none outline-none text-sm w-full placeholder:text-white/30 text-white" />
+              <button className="text-xs font-bold uppercase tracking-widest hover:text-primary transition-colors">JOIN</button>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 text-xs text-white/30">
+          <p>© 2026 VELOURAH L.L.C. ALL RIGHTS RESERVED.</p>
+          <div className="flex gap-6 mt-4 md:mt-0 uppercase tracking-widest">
+            <a href="#" className="hover:text-white transition-colors">Instagram</a>
+            <a href="#" className="hover:text-white transition-colors">Pinterest</a>
+            <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
           </div>
         </div>
       </footer>
@@ -403,16 +305,17 @@ export default function Home() {
       {/* Floating Chat Button */}
       {!isChatOpen && (
         <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 1, type: "spring" }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 20 }}
           onClick={() => setIsChatOpen(true)}
-          className="fixed bottom-6 right-6 z-30 w-14 h-14 bg-gradient-to-r from-primary to-secondary rounded-full shadow-[0_0_30px_rgba(139,92,246,0.4)] flex items-center justify-center hover:shadow-[0_0_50px_rgba(139,92,246,0.6)] hover:scale-110 transition-all duration-300"
+          className="fixed bottom-6 right-6 z-30 w-16 h-16 bg-textDark text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-primary transition-colors hover:scale-105 duration-300 group"
         >
-          <MessageCircle size={24} className="text-white" />
+          <MessageCircle size={26} className="group-hover:rotate-12 transition-transform" />
         </motion.button>
       )}
 
+      {/* Chat Window Component */}
       <ChatWindow isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </main>
   );

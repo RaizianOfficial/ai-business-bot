@@ -1,7 +1,16 @@
-import { model } from "@/lib/gemini";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+const questions = [
+  "May I know your name? 😊",
+  "Please enter the product code you want to order.",
+  "What is your phone number?",
+  "Which city/state should we deliver to?",
+  "Please enter your full delivery address.",
+  "Can I have your email?(If you want, otherwise say skip)",
+  "Any custom message for the gift? (If you want, otherwise say no)"
+];
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,96 +23,74 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Get the latest user message
-    const latestUserMessage = [...messages].reverse().find((m: any) => m.role === "user");
-    const userText = latestUserMessage?.content?.trim() || "";
+    const lastMessage = messages[messages.length - 1]?.content || "";
 
-    // --- ORDER TRACKING DETECTION ---
-    const orderMatch = userText.match(/#VL\d+/i);
-    if (orderMatch) {
-      const orderId = orderMatch[0].toUpperCase();
+    // 6. Add order tracking detection
+    const match = lastMessage.match(/#VL\d+/i);
+    if (match) {
+      const orderId = match[0].toUpperCase();
       try {
         const protocol = req.headers.get("x-forwarded-proto") || "http";
         const host = req.headers.get("host");
         const res = await fetch(`${protocol}://${host}/api/track-order?orderId=${encodeURIComponent(orderId)}`);
         const data = await res.json();
 
-        if (!data.found) {
+        if (data.found && data.order) {
+          const order = data.order;
           return NextResponse.json({
-            text: `❌ Order not found.\n\nNo order exists with ID **${orderId}**.\n\nPlease check the Order ID and try again.\nExample: Track #VL1023`
+            text: `📦 Order Details\nOrder ID: ${order.order_id}\nStatus: ${order.status}\nCity: ${order.city}\nProduct: ${order.product_code}`
           });
+        } else {
+          return NextResponse.json({ text: "❌ Order not found." });
         }
-
-        const order = data.order;
-        const statusEmoji: Record<string, string> = {
-          "Pending": "⏳",
-          "Confirmed": "✅",
-          "Packed": "📦",
-          "Shipped": "🚚",
-          "Delivered": "🎉",
-          "Cancelled": "❌"
-        };
-
-        const emoji = statusEmoji[order.status] || "📋";
-
-        return NextResponse.json({
-          text: `📦 **Order Details**\n\n**Order ID:** ${order.order_id}\n**Product:** ${order.product_code}\n**Customer:** ${order.customer_name}\n**City:** ${order.city}\n\n**Status:** ${order.status} ${emoji}\n\nNeed anything else? Type **Order** to place a new order.`,
-          quickButtons: ["Place Order", "Track Order"]
-        });
       } catch (e) {
         console.error("Order tracking error:", e);
-        return NextResponse.json({
-          text: "Sorry, I couldn't look up that order right now. Please try again later."
-        });
+        return NextResponse.json({ text: "❌ Order not found." });
       }
     }
 
-    // --- TRACK ORDER REQUEST (without ID) ---
-    if (userText.toLowerCase() === "track order" || userText.toLowerCase() === "track") {
+    if (lastMessage.toLowerCase() === "track order" || lastMessage.toLowerCase() === "track") {
       return NextResponse.json({
-        text: "Please enter your Order ID 🔍\n\nExample: **#VL1023**",
-        awaitingOrderId: true
+        text: "Please enter your Order ID 🔍\n\nExample: **#VL1023**"
       });
     }
 
-    // --- PLACE ORDER FLOW ---
-    let orderData: any = {
-      name: "",
-      product_code: "",
-      phone: "",
-      city: "",
-      address: "",
-      email: "",
-      custom_message: ""
-    };
+    // 2. Implement step-based conversation logic
+    // Exclude starting commands from counting towards stepIndex
+    const ignoreWords = ["order", "place order"];
+    const userMessages = messages.filter((m: any) =>
+      m.role === "user" && !ignoreWords.includes(m.content.trim().toLowerCase()) && !m.content.trim().toLowerCase().includes("track")
+    );
 
-    let lastAsk = "";
-    for (const m of messages) {
-      if (m.role === "assistant" || m.role === "model") {
-        const text = m.content.toLowerCase();
-        if (text.includes("name")) lastAsk = "name";
-        else if (text.includes("product code") || text.includes("hamper code")) lastAsk = "product_code";
-        else if (text.includes("phone") || text.includes("number")) lastAsk = "phone";
-        else if (text.includes("city")) lastAsk = "city";
-        else if (text.includes("email")) lastAsk = "email";
-        else if (text.includes("address") || text.includes("delivery address")) lastAsk = "address";
-        else if (text.includes("message") || text.includes("card")) lastAsk = "custom_message";
-      } else if (m.role === "user") {
-        if (lastAsk) orderData[lastAsk] = m.content;
+    const stepIndex = userMessages.length;
+
+    if (stepIndex < questions.length) {
+      return NextResponse.json({ text: questions[stepIndex] });
+    } else {
+      // 3. Map user input to orderData
+      const orderData = {
+        name: userMessages[0]?.content || "",
+        product_code: userMessages[1]?.content || "",
+        phone: userMessages[2]?.content || "",
+        city: userMessages[3]?.content || "",
+        address: userMessages[4]?.content || "",
+        email: "Not provided",
+        custom_message: "None"
+      };
+
+      if (userMessages[5]) {
+        const val = userMessages[5].content.toLowerCase();
+        orderData.email = (val === "skip" || val === "no") ? "Not provided" : userMessages[5].content;
       }
-    }
 
-    let nextStep = "";
-    if (!orderData.name) nextStep = "ASK_NAME";
-    else if (!orderData.product_code) nextStep = "ASK_PRODUCT_CODE";
-    else if (!orderData.phone) nextStep = "ASK_PHONE";
-    else if (!orderData.city) nextStep = "ASK_CITY";
-    else if (!orderData.address) nextStep = "ASK_ADDRESS";
-    else if (!orderData.email) nextStep = "ASK_EMAIL";
-    else if (!orderData.custom_message) nextStep = "ASK_MESSAGE";
-    else nextStep = "CONFIRM_ORDER";
+      if (userMessages[6]) {
+        const val = userMessages[6].content.toLowerCase();
+        orderData.custom_message = (val === "skip" || val === "no") ? "None" : userMessages[6].content;
+      }
 
-    if (nextStep === "CONFIRM_ORDER") {
+      // 5. Order completion logic
+      const generatedOrderId = "#VL" + Math.floor(1000 + Math.random() * 9000);
+
       try {
         const protocol = req.headers.get("x-forwarded-proto") || "http";
         const host = req.headers.get("host");
@@ -111,14 +98,17 @@ export async function POST(req: NextRequest) {
         const saveRes = await fetch(`${protocol}://${host}/api/save-order`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderData)
+          body: JSON.stringify({ ...orderData, order_id: generatedOrderId })
         });
 
-        const saveData = await saveRes.json();
-        const orderId = saveData.order_id || "#VL0000";
+        let finalOrderId = generatedOrderId;
+        if (saveRes.ok) {
+          const data = await saveRes.json();
+          if (data.order_id) finalOrderId = data.order_id;
+        }
 
         return NextResponse.json({
-          text: `🎉 **Your order has been placed successfully!**\n\n**Order ID:** ${orderId}\n\nYou can use this Order ID anytime to check your order status.\n\nExample: **Track ${orderId}**\n\nThank you for choosing Velourah! 💜`,
+          text: `🎉 Order placed successfully!\nOrder ID: ${finalOrderId}\nYou can use this to track your order anytime.`,
           quickButtons: ["Place Order", "Track Order"]
         });
       } catch (e) {
@@ -129,45 +119,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const stepContexts: any = {
-      ASK_NAME: "Ask the customer for their name.",
-      ASK_PRODUCT_CODE: `Thank the user by name (${orderData.name}). Ask them for the hamper product code they want to order.`,
-      ASK_PHONE: "Ask the customer for their contact phone number.",
-      ASK_CITY: "Ask the customer for the delivery city.",
-      ASK_ADDRESS: "Ask the customer for their full delivery address.",
-      ASK_EMAIL: "Ask the customer for their email address (optional). If they say no, accept it.",
-      ASK_MESSAGE: "Ask the customer if they want to add a custom message for the gift card (optional). If they say no, accept it."
-    };
-
-    const prompt = `You are a helpful gift hamper assistant for Velourah. 
-${stepContexts[nextStep]} 
-Keep the question short, natural, and friendly. Do not include any extra conversation.`;
-
-    let text = "";
-    try {
-      const result = await model.generateContent(prompt);
-      text = result.response.text();
-    } catch (e) {
-      console.error("Gemini failed, using static fallback:", e);
-      const fallbacks: any = {
-        ASK_NAME: "May I know your name first? 😊",
-        ASK_PRODUCT_CODE: `Thanks ${orderData.name || ""}! Please provide the hamper product code you'd like to order.`,
-        ASK_PHONE: "What is your contact phone number?",
-        ASK_CITY: "Which city should we deliver this to?",
-        ASK_ADDRESS: "Please provide the full delivery address.",
-        ASK_EMAIL: "Can I have your email address? (You can say skip)",
-        ASK_MESSAGE: "Any custom message for the gift card? (You can say no)"
-      };
-      text = fallbacks[nextStep];
-    }
-
-    return NextResponse.json({ text });
-
   } catch (error: any) {
     console.error("Chat API error:", error);
-    return NextResponse.json(
-      { error: "AI response failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

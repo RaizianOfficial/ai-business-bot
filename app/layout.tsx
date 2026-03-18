@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const outfit = Outfit({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800", "900"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const playfair = Playfair_Display({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
   title: "Velourah - Premium Gift Hampers",
@@ -16,10 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} bg-[#020617] text-white min-h-screen selection:bg-primary/30`}>
+      <body className={`${inter.variable} ${playfair.variable} bg-background text-textDark min-h-screen selection:bg-primary/20 font-sans font-light`}>
         {children}
       </body>
     </html>
   );
 }
-

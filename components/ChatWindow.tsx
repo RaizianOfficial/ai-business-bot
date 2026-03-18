@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, X, RefreshCw, ShoppingBag, Search } from "lucide-react";
+import { Send, X, RefreshCw, HandPlatter, Search } from "lucide-react";
 import MessageBubble from "./MessageBubble";
+import { clsx } from "clsx";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -12,7 +13,7 @@ interface ChatMessage {
 
 export default function ChatWindow({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [input, setInput] = useState("");
-  const initialMessage = "Welcome to Velourah 🎁\n\nI can help you:\n\n1️⃣ Place a new hamper order\n2️⃣ Track an existing order\n\nType:\n**Order** to place a new order\nor\n**Track #OrderID** to check your order status";
+  const initialMessage = "Welcome to Velourah.\n\nI can help you:\n\n1️⃣ Place a new order\n2️⃣ Track an existing order\n\nType:\n**Order** to place a new order\nor\n**Track #OrderID** to check your order status";
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: initialMessage }
   ]);
@@ -45,12 +46,11 @@ export default function ChatWindow({ isOpen, onClose }: { isOpen: boolean; onClo
 
       setMessages((prev) => [...prev, { role: "assistant", content: data.text }]);
 
-      // Set quick buttons if provided by the API
       if (data.quickButtons) {
         setQuickButtons(data.quickButtons);
       }
     } catch (error) {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I'm having trouble connecting. Please try again later." }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Apologies, we're having trouble connecting. Please try again." }]);
     } finally {
       setIsLoading(false);
     }
@@ -78,106 +78,108 @@ export default function ChatWindow({ isOpen, onClose }: { isOpen: boolean; onClo
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          {/* Dark Overlay */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:items-end md:justify-end md:p-8">
+          {/* Subtle Outer Backdrop for clicking away */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-white/20 backdrop-blur-[2px]"
           />
 
-          {/* Chat Modal */}
+          {/* Floating Glassmorphic Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 50 }}
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 50 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative z-10 w-full max-w-md h-[100dvh] sm:h-[650px] sm:max-h-[85vh] flex flex-col bg-[#0f172a] sm:border border-white/20 sm:rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="relative z-10 w-full max-w-sm h-[85vh] md:h-[650px] flex flex-col bg-white/85 backdrop-blur-xl border border-white/60 rounded-[2rem] overflow-hidden shadow-glass"
           >
-            {/* Header */}
-            <div className="p-4 bg-gradient-to-r from-primary/30 to-secondary/30 border-b border-white/10 flex items-center justify-between">
+            {/* Minimal Header */}
+            <div className="px-6 py-5 border-b border-gray-200/50 flex items-center justify-between bg-white/40">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  <span className="text-lg">🎁</span>
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                  <span className="font-heading font-bold text-lg">V</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-white tracking-tight">Velourah Chat</h3>
-                  <p className="text-xs text-green-400 font-medium flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full inline-block animate-pulse"></span>
-                    Online & AI Powered
+                  <h3 className="font-heading font-bold text-textDark text-lg tracking-wide">Velourah</h3>
+                  <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-widest flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block animate-pulse"></span>
+                    Assistant
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button onClick={handleReset} className="p-2 hover:bg-white/10 rounded-full text-white/60 transition-colors" title="Reset Chat">
-                  <RefreshCw size={16} />
+              <div className="flex gap-1">
+                <button onClick={handleReset} className="p-2 hover:bg-gray-100/80 rounded-full text-gray-500 transition-colors" title="Reset Chat">
+                  <RefreshCw size={15} />
                 </button>
-                <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full text-white/60 transition-colors" title="Close">
+                <button onClick={onClose} className="p-2 hover:bg-gray-100/80 rounded-full text-gray-500 transition-colors" title="Close">
                   <X size={16} />
                 </button>
               </div>
             </div>
 
             {/* Messages Area */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 scroll-smooth">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 scroll-smooth">
               {messages.map((m, i) => (
                 <MessageBubble key={i} message={m} />
               ))}
+              
               {isLoading && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start mb-4">
-                  <div className="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl rounded-tl-none">
-                    <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" />
-                      <div className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce [animation-delay:0.2s]" />
-                      <div className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce [animation-delay:0.4s]" />
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start mb-6">
+                  <div className="bg-white/80 backdrop-blur-md px-5 py-4 rounded-3xl rounded-tl-sm border border-white/60 shadow-sm flex items-center h-[52px]">
+                    <div className="flex gap-2">
+                       <motion.div className="w-2 h-2 bg-primary/60 rounded-full" animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, ease: "easeInOut" }} />
+                       <motion.div className="w-2 h-2 bg-primary/60 rounded-full" animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, ease: "easeInOut", delay: 0.2 }} />
+                       <motion.div className="w-2 h-2 bg-primary/60 rounded-full" animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, ease: "easeInOut", delay: 0.4 }} />
                     </div>
                   </div>
                 </motion.div>
               )}
             </div>
 
-            {/* Quick Buttons */}
+            {/* Quick Buttons Overlay */}
             {quickButtons.length > 0 && !isLoading && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="px-4 pb-2 flex gap-2"
+                className="px-6 pb-4 flex flex-wrap gap-2 justify-end"
               >
                 {quickButtons.map((label) => (
                   <button
                     key={label}
                     onClick={() => handleQuickButton(label)}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-full text-sm font-semibold text-white hover:from-primary/40 hover:to-secondary/40 transition-all duration-300 hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-full text-xs font-semibold tracking-widest uppercase text-textDark hover:bg-primary hover:text-white hover:border-primary transition-all duration-300 shadow-sm"
                   >
-                    {label === "Place Order" ? <ShoppingBag size={14} /> : <Search size={14} />}
+                    {label === "Place Order" ? <HandPlatter size={14} /> : <Search size={14} />}
                     {label}
                   </button>
                 ))}
               </motion.div>
             )}
 
-            {/* Input Area */}
-            <div className="p-4 bg-white/5 border-t border-white/10">
-              <div className="relative group">
+            {/* Input Floating Dock Container */}
+            <div className="p-6 pt-2 bg-gradient-to-t from-white/90 to-transparent">
+              <div className="relative group flex items-center">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Type your message..."
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-4 pr-12 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  placeholder="Type a message..."
+                  className="w-full bg-white/70 border border-gray-200 rounded-full py-4 pl-6 pr-14 text-textDark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:bg-white transition-all shadow-sm font-sans tracking-wide"
                 />
                 <button
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
-                  className="absolute right-2 top-1.5 p-2 bg-primary text-white rounded-xl hover:bg-secondary disabled:opacity-50 disabled:grayscale transition-all shadow-lg"
+                  className="absolute right-2 p-2.5 bg-textDark text-white rounded-full hover:bg-primary disabled:opacity-40 transition-all shadow-md group-focus-within:bg-primary"
                 >
-                  <Send size={20} />
+                  <Send size={16} className="ml-0.5" />
                 </button>
               </div>
             </div>
+            
           </motion.div>
         </div>
       )}

@@ -13,7 +13,7 @@ function renderContent(text: string) {
   const parts = text.split(/\*\*(.*?)\*\*/g);
   return parts.map((part, i) => {
     if (i % 2 === 1) {
-      return <strong key={i} className="font-bold">{part}</strong>;
+      return <strong key={i} className="font-bold text-textDark">{part}</strong>;
     }
     // Handle newlines
     return part.split("\n").map((line, j, arr) => (
@@ -30,22 +30,24 @@ export default function MessageBubble({ message }: { message: Message }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      initial={{ opacity: 0, y: 15, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", damping: 20, stiffness: 200 }}
+      layout
       className={clsx(
-        "flex w-full mb-4",
+        "flex w-full mb-6",
         isUser ? "justify-end" : "justify-start"
       )}
     >
       <div
         className={clsx(
-          "max-w-[80%] rounded-2xl px-4 py-3 shadow-lg transition-all duration-300",
+          "max-w-[75%] rounded-3xl px-5 py-4 shadow-sm transition-all duration-300 relative",
           isUser
-            ? "bg-gradient-to-br from-primary to-secondary text-white rounded-tr-none"
-            : "bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-tl-none shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
+            ? "bg-textDark text-white border border-gray-800 rounded-tr-sm"
+            : "bg-white/80 backdrop-blur-md border border-white/60 text-gray-700 rounded-tl-sm shadow-glass"
         )}
       >
-        <div className="text-sm md:text-base leading-relaxed whitespace-pre-line">
+        <div className="text-sm tracking-wide leading-relaxed font-sans">
           {renderContent(message.content)}
         </div>
       </div>
