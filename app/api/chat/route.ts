@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         if (data.found && data.order) {
           const order = data.order;
           return NextResponse.json({
-            text: `📦 Order Details\nOrder ID: ${order.order_id}\nStatus: ${order.status}\nCity: ${order.city}\nProduct: ${order.product_code}`
+            text: `📦 Order Details\nOrder ID: ${order.order_id}\n👤Customer Name: ${order.customer_name}\n📍City: ${order.city}\nStatus: ${order.status}`
           });
         } else {
           return NextResponse.json({ text: "❌ Order not found." });
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({
-          text: `🎉 Order placed successfully!\nOrder ID: ${finalOrderId}\nYou can use this to track your order anytime.`,
+          text: `🎉 Order placed successfully!\nOrder ID: ${finalOrderId}\nYou can use this to track your order anytime 🥰.`,
           quickButtons: ["Place Order", "Track Order"]
         });
       } catch (e) {
