@@ -35,12 +35,20 @@ export default function ChatWindow({ isOpen, onClose }: { isOpen: boolean; onClo
     setIsLoading(true);
 
     try {
-      // Simulated API Call for visual testing
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      const mockResponse = "I've pulled up your account. How would you like to proceed?";
-      setMessages((prev) => [...prev, { role: "assistant", content: mockResponse }]);
-      setQuickButtons(["View Catalog", "Speak to Agent"]);
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+      const data = await response.json();
+
+      setMessages((prev) => [...prev, { role: "assistant", content: data.text }]);
+
+      if (data.quickButtons) {
+        setQuickButtons(data.quickButtons);
+      }
     } catch (error) {
+      console.error("Chat error:", error);
       setMessages((prev) => [...prev, { role: "assistant", content: "Apologies, we're having trouble connecting. Please try again." }]);
     } finally {
       setIsLoading(false);
