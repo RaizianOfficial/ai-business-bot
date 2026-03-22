@@ -24,28 +24,28 @@ function Section({ children, className = "", delay = 0 }: { children: React.Reac
 
 const hampers = [
   {
-    code: "VL001",
-    name: "Midnight Velvet",
-    price: "$185.00",
-    image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=800&auto=format&fit=crop"
+    code: "#OD908712",
+    name: "Aurora Twist",
+    price: "₹1,499",
+    image: "images/image1.jpeg"
   },
   {
-    code: "VL002",
-    name: "Artisan Dawn",
-    price: "$140.00",
-    image: "https://images.unsplash.com/photo-1513885535851-8b925b0cb01e?q=80&w=800&auto=format&fit=crop"
+    code: "#OD120034",
+    name: "Azure Bloom",
+    price: "₹1,199",
+    image: "images/image2.jpeg"
   },
   {
-    code: "VL003",
-    name: "Golden Hour",
-    price: "$210.00",
-    image: "https://images.unsplash.com/photo-1511216113906-8f56bbce1667?q=80&w=800&auto=format&fit=crop"
+    code: "#OD875847",
+    name: "Emerald Edge",
+    price: "₹179",
+    image: "images/image3.jpeg"
   },
   {
-    code: "VL004",
-    name: "Rosewood Serenity",
-    price: "$195.00",
-    image: "https://images.unsplash.com/photo-1542452255146-2ae702cb2e1c?q=80&w=800&auto=format&fit=crop"
+    code: "#OD382694",
+    name: "Blue Petal Chain",
+    price: "₹1,699",
+    image: "images/image4.jpeg"
   },
 ];
 
@@ -59,7 +59,14 @@ export default function Home() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const menuRef = useRef<HTMLElement>(null);
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -86,9 +93,7 @@ export default function Home() {
         ref={menuRef}
         initial={{ y: -80 }}
         animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          scrolled || mobileMenuOpen ? "bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm text-textDark" : "bg-transparent"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm text-textDark`}
       >
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between relative z-50">
           <div className="font-heading text-xl font-bold tracking-widest uppercase">
@@ -103,7 +108,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <button className="hidden md:block hover:text-primary transition-colors">Search</button>
             <button className="hover:text-primary transition-colors">Bag</button>
-            <button 
+            <button
               className="md:hidden hover:text-primary transition-colors ml-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
@@ -137,14 +142,14 @@ export default function Home() {
 
       {/* Hero Header */}
       <section className="relative w-full h-[85vh] md:h-[95vh] flex items-center bg-gray-200">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=2000&auto=format&fit=crop')" }}
+          style={{ backgroundImage: "url('images/hero-bg.png')" }}
         />
         <div className="absolute inset-0 bg-black/20" /> {/* Subtle darkening */}
-        
+
         <div className="relative z-10 max-w-7xl mx-auto px-6 w-full mt-20">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
@@ -157,7 +162,7 @@ export default function Home() {
             <p className="text-gray-600 mb-8 max-w-sm leading-relaxed">
               Curated with intention and wrapped in elegance. Discover gift hampers that speak when words aren't enough.
             </p>
-            <button 
+            <button
               onClick={() => setIsChatOpen(true)}
               className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-xs font-bold tracking-widest uppercase transition-colors"
             >
@@ -212,12 +217,12 @@ export default function Home() {
                 </div>
                 <h3 className="font-heading text-lg mb-1">{hamper.name}</h3>
                 <p className="text-gray-500 text-sm mb-6">{hamper.price}</p>
-                
-                <button 
-                  onClick={() => setIsChatOpen(true)}
-                  className="mt-auto w-full py-3 border border-gray-200 text-xs font-semibold tracking-widest text-gray-600 hover:bg-textDark hover:text-white transition-colors"
+
+                <button
+                  onClick={() => handleCopyCode(hamper.code)}
+                  className="mt-auto w-full py-3 border border-gray-200 text-xs font-semibold tracking-widest text-gray-600 hover:bg-textDark hover:text-white transition-colors flex justify-center items-center gap-2"
                 >
-                  ADD TO SELECTION
+                  {copiedCode === hamper.code ? "COPIED!" : "COPY PRODUCT CODE"}
                 </button>
               </motion.div>
             ))}
@@ -229,37 +234,37 @@ export default function Home() {
       <Section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="font-heading text-3xl md:text-4xl mb-16">Gifting Made Simple</h2>
-          
+
           <div className="flex justify-between items-start relative before:absolute before:top-6 before:left-[10%] before:right-[10%] before:-z-10 before:h-[1px] before:bg-gray-200 hidden md:flex">
-             {[
-               { id: "1", title: "Choose", desc: "Browse our curated collection of theme-based hampers." },
-               { id: "2", title: "Personalize", desc: "Add a handwritten note or specific artisanal additions." },
-               { id: "3", title: "Deliver", desc: "We ensure it arrives in pristine condition at their doorstep." },
-             ].map((step, i) => (
-               <div key={i} className="flex flex-col items-center max-w-xs px-4 bg-white">
-                 <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center font-heading text-lg text-textDark mb-6 border-4 border-white shadow-sm">
-                   {step.id}
-                 </div>
-                 <h3 className="font-heading text-lg mb-2">{step.title}</h3>
-                 <p className="text-sm text-gray-500">{step.desc}</p>
-               </div>
-             ))}
+            {[
+              { id: "1", title: "Choose", desc: "Browse our curated collection of theme-based hampers." },
+              { id: "2", title: "Personalize", desc: "Add a handwritten note or specific artisanal additions." },
+              { id: "3", title: "Deliver", desc: "We ensure it arrives in pristine condition at their doorstep." },
+            ].map((step, i) => (
+              <div key={i} className="flex flex-col items-center max-w-xs px-4 bg-white">
+                <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center font-heading text-lg text-textDark mb-6 border-4 border-white shadow-sm">
+                  {step.id}
+                </div>
+                <h3 className="font-heading text-lg mb-2">{step.title}</h3>
+                <p className="text-sm text-gray-500">{step.desc}</p>
+              </div>
+            ))}
           </div>
 
           <div className="md:hidden flex flex-col gap-10">
             {[
-               { id: "1", title: "Choose", desc: "Browse our curated collection of theme-based hampers." },
-               { id: "2", title: "Personalize", desc: "Add a handwritten note or specific artisanal additions." },
-               { id: "3", title: "Deliver", desc: "We ensure it arrives in pristine condition at their doorstep." },
-             ].map((step, i) => (
-               <div key={i} className="flex flex-col items-center text-center">
-                 <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center font-heading text-lg text-textDark mb-4">
-                   {step.id}
-                 </div>
-                 <h3 className="font-heading text-lg mb-2">{step.title}</h3>
-                 <p className="text-sm text-gray-500">{step.desc}</p>
-               </div>
-             ))}
+              { id: "1", title: "Choose", desc: "Browse our curated collection of theme-based hampers." },
+              { id: "2", title: "Personalize", desc: "Add a handwritten note or specific artisanal additions." },
+              { id: "3", title: "Deliver", desc: "We ensure it arrives in pristine condition at their doorstep." },
+            ].map((step, i) => (
+              <div key={i} className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center font-heading text-lg text-textDark mb-4">
+                  {step.id}
+                </div>
+                <h3 className="font-heading text-lg mb-2">{step.title}</h3>
+                <p className="text-sm text-gray-500">{step.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </Section>
@@ -268,19 +273,19 @@ export default function Home() {
       <Section className="py-4">
         <div className="w-full flex flex-col md:flex-row h-auto md:h-[60vh]">
           {[
-            { title: "Birthdays", image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=800&auto=format&fit=crop" },
-            { title: "Anniversaries", image: "https://images.unsplash.com/photo-1606214041725-aa80ab7e9081?q=80&w=800&auto=format&fit=crop" },
-            { title: "New Beginnings", image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=800&auto=format&fit=crop" },
+            { title: "Birthdays", image: "images/image6.jpeg" },
+            { title: "Anniversaries", image: "images/image7.jpeg" },
+            { title: "New Beginnings", image: "images/image8.jpeg" },
           ].map((item, i) => (
             <div key={i} className="flex-1 relative group cursor-pointer overflow-hidden h-64 md:h-auto border-r border-white/10 last:border-0 border-y md:border-y-0">
-               <img src={item.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={item.title} />
-               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
-               <div className="absolute inset-x-0 bottom-0 p-8 flex flex-col items-start translate-y-4 group-hover:translate-y-0 transition-transform">
-                 <h3 className="font-heading text-2xl text-white mb-2">{item.title}</h3>
-                 <span className="text-white/80 text-xs font-semibold tracking-widest uppercase flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                   EXPLORE <ArrowRight size={14} />
-                 </span>
-               </div>
+              <img src={item.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={item.title} />
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
+              <div className="absolute inset-x-0 bottom-0 p-8 flex flex-col items-start translate-y-4 group-hover:translate-y-0 transition-transform">
+                <h3 className="font-heading text-2xl text-white mb-2">{item.title}</h3>
+                <span className="text-white/80 text-xs font-semibold tracking-widest uppercase flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  EXPLORE <ArrowRight size={14} />
+                </span>
+              </div>
             </div>
           ))}
         </div>

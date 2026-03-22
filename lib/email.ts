@@ -43,6 +43,18 @@ export const sendOrderNotification = async (order: any) => {
               <td style="padding: 12px 10px; border-bottom: 1px solid #eeeeee; color: #222;">${order.product_code}</td>
             </tr>
             <tr>
+              <td style="padding: 12px 10px; border-bottom: 1px solid #eeeeee; font-weight: bold; color: #555;">Product Name</td>
+              <td style="padding: 12px 10px; border-bottom: 1px solid #eeeeee; color: #222;">${order.product_name || "N/A"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 10px; border-bottom: 1px solid #eeeeee; font-weight: bold; color: #555;">Price</td>
+              <td style="padding: 12px 10px; border-bottom: 1px solid #eeeeee; color: #222;">₹${order.price || "0"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 10px; border-bottom: 1px solid #eeeeee; font-weight: bold; color: #555;">Discount</td>
+              <td style="padding: 12px 10px; border-bottom: 1px solid #eeeeee; color: #222;">${order.discount || "None"}</td>
+            </tr>
+            <tr>
               <td style="padding: 12px 10px; border-bottom: 1px solid #eeeeee; font-weight: bold; color: #555;">Customer Name</td>
               <td style="padding: 12px 10px; border-bottom: 1px solid #eeeeee; color: #222;">${order.name}</td>
             </tr>
@@ -86,6 +98,9 @@ export const sendOrderNotification = async (order: any) => {
 Order ID: ${order.order_id || "N/A"}
 Name: ${order.name}
 Product Code: ${order.product_code}
+Product Name: ${order.product_name || "N/A"}
+Price: ₹${order.price || "0"}
+Discount: ${order.discount || "None"}
 Phone: ${order.phone}
 City: ${order.city}
 Address: ${order.address}

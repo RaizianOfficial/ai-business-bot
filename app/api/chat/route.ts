@@ -2,16 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const questions = [
-  "May I know your name? 😊",
-  "Please enter the product code you want to order.",
-  "What is your phone number?",
-  "Which city/state should we deliver to?",
-  "Please enter your full delivery address.",
-  "Can I have your email?(If you want, otherwise say skip)",
-  "Any custom message for the gift? (If you want, otherwise say no)"
-];
-
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
@@ -24,6 +14,7 @@ export async function POST(req: NextRequest) {
     }
 
     const lastMessage = messages[messages.length - 1]?.content || "";
+    const lastAssistantMessageInfo = messages.length > 1 ? messages[messages.length - 2].content : "";
 
     // TRACKING FLOW: Detect #VL...
     const match = lastMessage.match(/#VL\d+/i);
@@ -38,7 +29,7 @@ export async function POST(req: NextRequest) {
         if (data.found && data.order) {
           const order = data.order;
           return NextResponse.json({
-            text: `📦 Order Details\nOrder ID: ${order.order_id}\n👤Customer Name: ${order.customer_name}\n📍City: ${order.city}\nStatus: ${order.status}`,
+            text: `📦 Order Details\nOrder ID: ${order.order_id}\n👤Customer Name: ${order.customer_name || order.name}\n📍City: ${order.city}\nStatus: ${order.status}`,
             quickButtons: ["Place Order", "Track Order"]
           });
         } else {
@@ -63,93 +54,144 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // ORDER FLOW
-    const userMessages = messages.filter((m: any) => m.role === "user");
-
-    // Walk backwards to find the last explicit starting command
-    let startIndex = -1;
-    let mode = "order"; // Default to order if no specific command was typed
-    for (let i = userMessages.length - 1; i >= 0; i--) {
-        const text = userMessages[i].content.trim().toLowerCase();
-        if (text === "order" || text === "place order") {
-            startIndex = i;
-            mode = "order";
-            break;
-        }
-        if (text === "track" || text === "track order" || userMessages[i].content.match(/#VL\d+/i)) {
-            startIndex = i;
-            mode = "track";
-            break;
-        }
+    // ORDER FLOW: Reset flow if user types Order
+    if (lastMessage.toLowerCase() === "order" || lastMessage.toLowerCase() === "place order") {
+       return NextResponse.json({ text: "May I know your name? 😊" });
     }
 
-    if (mode === "track") {
-        // Reached only if user previously typed "track", we asked for ID, and they responded with something invalid.
-        return NextResponse.json({
-            text: "Please enter a valid Order ID starting with #VL.\n\nExample: #VL1023",
-            quickButtons: ["Place Order", "Track Order"]
-        });
+    // Determine what to ask next based on the last assistant message
+    if (lastAssistantMessageInfo.includes("Welcome to Velourah")) {
+       return NextResponse.json({ text: "May I know your name? 😊" });
     }
-
-    // Extract only messages sent AFTER the "Order" command
-    let relevantMessages = userMessages.slice(startIndex + 1);
-    const stepIndex = relevantMessages.length;
-
-    // Ask next question
-    if (stepIndex < questions.length) {
-      return NextResponse.json({ text: questions[stepIndex] });
-    } else {
-      // Collect order data
-      const orderData = {
-        name: relevantMessages[0]?.content || "",
-        product_code: relevantMessages[1]?.content || "",
-        phone: relevantMessages[2]?.content || "",
-        city: relevantMessages[3]?.content || "",
-        address: relevantMessages[4]?.content || "",
-        email: "Not provided",
-        custom_message: "None"
-      };
-
-      if (relevantMessages[5]) {
-        const val = relevantMessages[5].content.toLowerCase();
-        orderData.email = (val === "skip" || val === "no") ? "Not provided" : relevantMessages[5].content;
-      }
-
-      if (relevantMessages[6]) {
-        const val = relevantMessages[6].content.toLowerCase();
-        orderData.custom_message = (val === "skip" || val === "no") ? "None" : relevantMessages[6].content;
-      }
-
-      const generatedOrderId = "#VL" + Math.floor(1000 + Math.random() * 9000);
-
-      try {
-        const protocol = req.headers.get("x-forwarded-proto") || "http";
-        const host = req.headers.get("host");
-
-        const saveRes = await fetch(`${protocol}://${host}/api/save-order`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...orderData, order_id: generatedOrderId })
-        });
-
-        let finalOrderId = generatedOrderId;
-        if (saveRes.ok) {
-          const data = await saveRes.json();
-          if (data.order_id) finalOrderId = data.order_id;
-        }
-
-        return NextResponse.json({
-          text: `🎉 Order placed successfully!\nOrder ID: ${finalOrderId}\nYou can use this to track your order anytime 🥰.`,
-          quickButtons: ["Place Order", "Track Order"]
-        });
-      } catch (e) {
-        console.error("Failed to save order:", e);
-        return NextResponse.json({
-          text: "Sorry, there was an error placing your order. Please try again.",
-          quickButtons: ["Place Order", "Track Order"]
-        });
-      }
+    else if (lastAssistantMessageInfo.includes("know your name")) {
+       return NextResponse.json({ text: "Please enter the product code you want to order." });
     }
+    else if (lastAssistantMessageInfo.includes("product code you want to order") || lastAssistantMessageInfo.includes("Invalid product code")) {
+       // User entered product code. Validate it.
+       const code = lastMessage.trim().toUpperCase(); // normalize code
+       
+       const protocol = req.headers.get("x-forwarded-proto") || "http";
+       const host = req.headers.get("host");
+       
+       try {
+           const res = await fetch(`${protocol}://${host}/api/get-product?code=${encodeURIComponent(code)}`);
+           const prodData = await res.json();
+           
+           if (prodData.found) {
+               const p = prodData.product;
+               const discountLine = p.discount ? `\nDiscount: ${p.discount}` : "";
+               return NextResponse.json({
+                   text: `🛍 Product Details:\n\nName: ${p.product_name}\nPrice: ₹${p.price}${discountLine}\n\nDo you want to order this product?`,
+                   quickButtons: ["Yes, continue", "Change product"]
+               });
+           } else {
+               return NextResponse.json({
+                   text: "❌ Invalid product code. Please enter a valid code."
+               });
+           }
+       } catch (error) {
+           console.error("Product fetch error:", error);
+           return NextResponse.json({
+               text: "❌ Invalid product code. Please enter a valid code."
+           });
+       }
+    }
+    else if (lastAssistantMessageInfo.includes("Do you want to order this product?")) {
+       if (lastMessage.toLowerCase() === "change product" || lastMessage.toLowerCase() === "change") {
+           return NextResponse.json({ text: "Please enter the product code you want to order." });
+       } else {
+           return NextResponse.json({ text: "What is your phone number?" });
+       }
+    }
+    else if (lastAssistantMessageInfo.includes("phone number")) {
+       return NextResponse.json({ text: "Which city/state should we deliver to?" });
+    }
+    else if (lastAssistantMessageInfo.includes("city/state")) {
+       return NextResponse.json({ text: "Please enter your full delivery address." });
+    }
+    else if (lastAssistantMessageInfo.includes("delivery address")) {
+       return NextResponse.json({ text: "Can I have your email?(If you want, otherwise say skip)" });
+    }
+    else if (lastAssistantMessageInfo.includes("your email")) {
+       return NextResponse.json({ text: "Any custom message for the gift? (If you want, otherwise say no)" });
+    }
+    else if (lastAssistantMessageInfo.includes("custom message")) {
+       // Gather all data!
+       const orderData = {
+          name: "", product_code: "", phone: "", city: "", address: "", email: "Not provided", custom_message: "None"
+       };
+       
+       // Extraction loop: look at pairs of "assistant -> user" messages
+       for (let i = 0; i < messages.length - 1; i++) {
+          const msg = messages[i];
+          const nextMsg = messages[i+1];
+          if (msg.role === "assistant" && nextMsg.role === "user") {
+             const q = msg.content.toLowerCase();
+             const ans = nextMsg.content;
+             if (q.includes("know your name")) orderData.name = ans;
+             // The code could be overwritten if they changed product
+             if (q.includes("product code you want")) orderData.product_code = ans.toUpperCase();
+             if (q.includes("phone number")) orderData.phone = ans;
+             if (q.includes("city/state")) orderData.city = ans;
+             if (q.includes("delivery address")) orderData.address = ans;
+             if (q.includes("your email")) orderData.email = (ans.toLowerCase() === "skip" || ans.toLowerCase() === "no") ? "Not provided" : ans;
+             if (q.includes("custom message")) orderData.custom_message = (ans.toLowerCase() === "skip" || ans.toLowerCase() === "no") ? "None" : ans;
+          }
+       }
+       
+       const protocol = req.headers.get("x-forwarded-proto") || "http";
+       const host = req.headers.get("host");
+       
+       // Fetch product details one more time to include in order record
+       let prodDetails = { product_name: "", price: 0, discount: "" };
+       try {
+           const res = await fetch(`${protocol}://${host}/api/get-product?code=${encodeURIComponent(orderData.product_code)}`);
+           const pData = await res.json();
+           if (pData.found) {
+               prodDetails = pData.product;
+           }
+       } catch (e) {
+           console.error("Failed to fetch product for save:", e);
+       }
+
+       // Save order
+       const finalData = {
+           ...orderData,
+           product_name: prodDetails.product_name,
+           price: prodDetails.price,
+           discount: prodDetails.discount
+       };
+
+       try {
+         const saveRes = await fetch(`${protocol}://${host}/api/save-order`, {
+           method: "POST",
+           headers: { "Content-Type": "application/json" },
+           body: JSON.stringify(finalData)
+         });
+         
+         let finalOrderId = "N/A";
+         if (saveRes.ok) {
+           const data = await saveRes.json();
+           if (data.order_id) finalOrderId = data.order_id;
+         }
+
+         return NextResponse.json({
+           text: `🎉 Order placed successfully!\nOrder ID: ${finalOrderId}\nYou can use this to track your order anytime 🥰.`,
+           quickButtons: ["Place Order", "Track Order"]
+         });
+       } catch(e) {
+         console.error("Failed to save order:", e);
+         return NextResponse.json({
+           text: "Sorry, there was an error placing your order. Please try again.",
+           quickButtons: ["Place Order", "Track Order"]
+         });
+       }
+    }
+    
+    // Fallback
+    return NextResponse.json({
+      text: "I didn't quite catch that. Try saying 'Order' or 'Track Order'."
+    });
 
   } catch (error: any) {
     console.error("Chat API error:", error);
