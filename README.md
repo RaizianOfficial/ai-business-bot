@@ -1,76 +1,125 @@
-# AI Gift Hamper Order Assistant
+# 🎁 AI Gift Hamper Order Assistant
 
-A production-ready AI-powered order management system for gift hamper stores.
-
-## Features
-- **AI Chatbot**: Sequential order collection using Google Gemini 1.5 Flash.
-- **Admin Dashboard**: Secure order management (Confirm, Ship, Delete).
-- **Email Notifications**: Instant admin alerts via SMTP/Nodemailer.
-- **Modern UI**: Dark mode, glassmorphism, and smooth animations with Framer Motion.
-- **Secure**: Passkey-protected admin access.
-
-## Tech Stack
-- **Frontend**: Next.js 14+ (App Router), TailwindCSS, TypeScript.
-- **Backend**: Next.js Serverless Routes.
-- **AI**: Google Gemini API.
-- **Database**: Firebase Firestore.
-- **Email**: SMTP (Nodemailer).
+⚡ An AI-powered chatbot that automatically takes complete gift hamper orders from customers — no manual chatting required.
 
 ---
 
-## Setup Instructions
+## 🎥 Demo
 
-### 1. Environment Variables
-Create a `.env.local` file in the root directory and fill in the following:
+> Customer → Chat → Order captured → Admin notified → Done 🚀
+> (Add demo GIF/video here)
 
-```env
-GEMINI_API_KEY=your_gemini_api_key
+---
 
-# Firebase Service Account
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_CLIENT_EMAIL=your_client_email
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+## 🧠 What It Does
 
-# SMTP Settings
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
-ADMIN_EMAIL=admin_recipient@gmail.com
+This system replaces manual WhatsApp order handling with an AI assistant that:
 
-# Admin Security
-ADMIN_PASSKEY=1234
-```
+* Asks customers questions step-by-step
+* Collects complete order details
+* Saves structured data to database
+* Notifies admin instantly
 
-### 2. Firebase Setup
-1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/).
-2. Enable **Firestore Database**.
-3. Go to Project Settings > Service Accounts.
-4. Generate a new private key and copy the details to your `.env.local`.
+---
 
-### 3. Database Seeding
-After setting up `.env.local`, run the seed script to initialize products:
+## ✨ Features
+
+* 🤖 AI Chatbot (Google Gemini)
+* 🧾 Structured order collection (no messy chats)
+* 📩 Instant email notifications (SMTP)
+* 📊 Admin dashboard (confirm, ship, delete)
+* 🔐 Secure admin access (passkey protected)
+* 🎨 Modern UI (dark mode + animations)
+
+---
+
+## 🎯 Use Cases
+
+* 🎁 Gift hamper businesses
+* 🎂 Custom order shops
+* 🛍️ Small D2C brands
+* 📦 Manual order-based stores
+
+---
+
+## 🛠️ Tech Stack
+
+* Next.js 14 (App Router)
+* Tailwind CSS + Framer Motion
+* Firebase Firestore
+* Google Gemini API
+* Nodemailer (SMTP)
+
+---
+
+## 🚀 Quick Start
+
 ```bash
-npm run seed
-```
-
-### 4. Run Locally
-```bash
+git clone https://github.com/raizianofficial/ai-business-bot.git
+cd YOUR_REPO
 npm install
 npm run dev
 ```
 
 ---
 
-## Deployment on Vercel
+## 🔐 Environment Setup
 
-1. Push your code to GitHub.
-2. Connect your repository to [Vercel](https://vercel.com/).
-3. Add all environment variables from `.env.local` to the Vercel project settings.
-4. Deploy!
+Create `.env.local`:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_CLIENT_EMAIL=your_client_email
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n"
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+ADMIN_EMAIL=admin@gmail.com
+
+ADMIN_PASSKEY=your_secure_passkey
+```
 
 ---
 
-## System Architecture
+## ⚙️ How It Works
 
-Customer Browser -> Next.js Website -> Chatbot UI -> API Route /api/chat -> Gemini AI -> Structured Order Data -> Firestore Database -> SMTP Email Notification -> Admin Dashboard
+1. Customer opens chatbot
+2. AI asks questions step-by-step
+3. Order is structured and saved
+4. Admin gets email notification
+5. Order managed via dashboard
+
+---
+
+## 🗺️ Roadmap
+
+* [ ] WhatsApp integration
+* [ ] Payment integration
+* [ ] Multi-admin support
+* [ ] Order analytics
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome!
+
+---
+
+## ⭐ Support
+
+If you find this useful:
+
+👉 Star the repo
+👉 Follow for more projects
+
+---
+
+## 🧑‍💻 Author
+
+Built by Sunny Rawat (Raizian)
+Building real-world AI tools 🚀
