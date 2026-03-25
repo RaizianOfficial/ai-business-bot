@@ -55,7 +55,7 @@ This system replaces manual WhatsApp order handling with an AI assistant that:
 ## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/raizianofficial/ai-business-bot.git
+git clone https://github.com/raizianofficial/ai-order-chatbot.git
 cd YOUR_REPO
 npm install
 npm run dev
